@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phòng họp - Speech to Text</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        .cc-scrollbar::-webkit-scrollbar {
+            width: 8px;
+            background: #e0e7ef;
+        }
+        .cc-scrollbar::-webkit-scrollbar-thumb {
+            background: #a5b4fc;
+            border-radius: 6px;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-blue-100 via-indigo-100 to-blue-200 flex items-center justify-center py-2">
+    <div class="w-[95vw] max-w-[1500px] bg-white/90 rounded-3xl shadow-2xl p-2 md:p-8 border border-blue-100 relative overflow-hidden max-h-[92vh] overflow-auto">
+        <div class="absolute -top-10 -right-10 w-40 h-40 bg-gradient-to-br from-blue-300/40 to-indigo-400/30 rounded-full blur-2xl z-0"></div>
+        <div class="absolute -bottom-10 -left-10 w-40 h-40 bg-gradient-to-tr from-indigo-200/40 to-blue-400/30 rounded-full blur-2xl z-0"></div>
+        
+        <div class="flex flex-col md:flex-row gap-6 md:gap-8 h-full z-10 relative min-h-[70vh]">
+            <!-- Thông tin cuộc họp bên trái -->
+            <div class="md:w-1/4 w-full flex flex-col justify-between md:items-start items-start">
+                <div>
+                    <div class="flex items-center gap-3 mb-6">
+                        <a href="index.html" class="text-blue-600 hover:text-blue-800 transition">
+                            <i class="bi bi-arrow-left-circle text-2xl"></i>
+                        </a>
+                        <h2 class="text-2xl font-extrabold text-blue-900 tracking-wider drop-shadow-lg">Thông tin cuộc họp</h2>
+                    </div>
+                    <div id="meetingInfo" class="space-y-3 mb-6">
+                        <div class="bg-blue-50/60 rounded-lg px-4 py-3 shadow-sm">
+                            <span class="font-semibold text-gray-700"><i class="bi bi-bookmark me-2"></i>Tên cuộc họp:</span>
+                            <span id="infoMeetingName" class="text-blue-700 font-medium"></span>
+                        </div>
+                        <div class="bg-blue-50/60 rounded-lg px-4 py-3 shadow-sm">
+                            <span class="font-semibold text-gray-700"><i class="bi bi-hash me-2"></i>Mã cuộc họp:</span>
+                            <span id="infoMeetingCode" class="text-blue-700 font-medium"></span>
+                        </div>
+                        <div class="bg-blue-50/60 rounded-lg px-4 py-3 shadow-sm">
+                            <span class="font-semibold text-gray-700"><i class="bi bi-building me-2"></i>Phòng ban:</span>
+                            <span id="infoDepartment" class="text-blue-700 font-medium"></span>
+                        </div>
+                        <div class="bg-blue-50/60 rounded-lg px-4 py-3 shadow-sm">
+                            <span class="font-semibold text-gray-700"><i class="bi bi-door-open me-2"></i>Phòng họp:</span>
+                            <span id="infoRoom" class="text-blue-700 font-medium"></span>
+                        </div>
+                        <div class="bg-blue-50/60 rounded-lg px-4 py-3 shadow-sm">
+                            <span class="font-semibold text-gray-700"><i class="bi bi-person-badge me-2"></i>Chủ tọa:</span>
+                            <span id="infoHostName" class="text-blue-700 font-medium"></span>
+                        </div>
+                        <div class="bg-blue-50/60 rounded-lg px-4 py-3 shadow-sm">
+                            <span class="font-semibold text-gray-700"><i class="bi bi-person-workspace me-2"></i>Thư ký:</span>
+                            <span id="infoSecretaryName" class="text-blue-700 font-medium"></span>
+                        </div>
+                        <div class="bg-blue-50/60 rounded-lg px-4 py-3 shadow-sm">
+                            <span class="font-semibold text-gray-700"><i class="bi bi-clock me-2"></i>Thời gian:</span>
+                            <span id="infoTime" class="text-blue-700 font-medium"></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="w-full space-y-4">
+                    <div>
+                        <label for="micSelect" class="block font-semibold text-gray-700 mb-2">
+                            <i class="bi bi-mic me-1"></i>Chọn micro sử dụng:
+                        </label>
+                        <select id="micSelect" class="w-full px-4 py-2 border border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition bg-white text-gray-900"></select>
+                    </div>
+                    
+                    <div class="flex flex-col gap-3">
+                        <button id="meetingBtn" class="w-full px-4 py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl shadow-lg transition-all duration-200 text-base tracking-wide flex items-center justify-center gap-2">
+                            <i class="bi bi-play-circle"></i>
+                            <span>Bắt đầu cuộc họp</span>
+                        </button>
+                        <button id="micBtn" class="w-full px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg transition-all duration-200 text-base tracking-wide flex items-center justify-center gap-2" disabled>
+                            <i class="bi bi-mic"></i>
+                            <span>Bật mic</span>
+                        </button>
+                        <button id="saveDocBtn" class="w-full px-4 py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl shadow-lg transition-all duration-200 text-base tracking-wide flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                            <i class="bi bi-file-earmark-word"></i>
+                            <span>Lưu tài liệu</span>
+                        </button>
+                        <a href="index.html" class="w-full px-4 py-3 bg-gray-500 hover:bg-gray-600 text-white font-bold rounded-xl shadow-lg transition-all duration-200 text-base tracking-wide flex items-center justify-center gap-2 no-underline">
+                            <i class="bi bi-arrow-left"></i>
+                            <span>Quay lại</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Ô textbox CC bên phải -->
+            <div class="md:w-3/4 w-full flex flex-col">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-lg font-bold text-gray-700">
+                        <i class="bi bi-chat-text me-2"></i>Nội dung cuộc họp (Speech-to-Text)
+                    </h3>
+                    <div id="connectionStatus" class="flex items-center gap-2 text-sm">
+                        <span class="w-3 h-3 rounded-full bg-gray-400"></span>
+                        <span class="text-gray-500">Chưa kết nối</span>
+                    </div>
+                </div>
+                <textarea id="output" readonly class="cc-scrollbar w-full flex-1 min-h-[500px] h-[75vh] p-8 border-2 border-blue-300 rounded-2xl bg-white/90 text-xl font-mono text-gray-900 shadow-inner resize-none focus:outline-none focus:ring-2 focus:ring-blue-400 transition" style="max-height:90vh;" placeholder="Nội dung cuộc họp sẽ được hiển thị tại đây..."></textarea>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Lấy danh sách micro và populate vào select
+        async function loadMicrophones() {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) return;
+            try {
+                // Request permission first to get labels
+                await navigator.mediaDevices.getUserMedia({ audio: true });
+                
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                const micSelect = document.getElementById('micSelect');
+                micSelect.innerHTML = '';
+                
+                const defaultOption = document.createElement('option');
+                defaultOption.value = '';
+                defaultOption.textContent = '-- Chọn microphone --';
+                micSelect.appendChild(defaultOption);
+                
+                let found = false;
+                devices.forEach(device => {
+                    if (device.kind === 'audioinput') {
+                        const option = document.createElement('option');
+                        option.value = device.deviceId;
+                        option.textContent = device.label || `Microphone ${micSelect.length}`;
+                        micSelect.appendChild(option);
+                        found = true;
+                    }
+                });
+                if (!found) {
+                    const option = document.createElement('option');
+                    option.value = '';
+                    option.textContent = 'Không tìm thấy micro';
+                    micSelect.appendChild(option);
+                }
+            } catch (e) {
+                const micSelect = document.getElementById('micSelect');
+                micSelect.innerHTML = '<option value="">Không thể truy cập thiết bị</option>';
+            }
+        }
+        
+        window.addEventListener('DOMContentLoaded', () => {
+            loadMicrophones();
+            loadMeetingInfo();
+        });
+
+        // Hiển thị thông tin cuộc họp từ localStorage
+        function loadMeetingInfo() {
+            const info = JSON.parse(localStorage.getItem('meetingInfo') || '{}');
+            document.getElementById('infoMeetingName').textContent = info.meetingName || 'Chưa có thông tin';
+            document.getElementById('infoMeetingCode').textContent = info.meetingCode || '-';
+            document.getElementById('infoDepartment').textContent = info.department || '-';
+            document.getElementById('infoRoom').textContent = info.room || '-';
+            document.getElementById('infoHostName').textContent = info.hostName || '-';
+            document.getElementById('infoSecretaryName').textContent = info.secretaryName || '-';
+            document.getElementById('infoTime').textContent = info.startTime || '-';
+            
+            // Update page title
+            if (info.meetingName) {
+                document.title = `${info.meetingName} - Speech to Text`;
+            }
+        }
+
+        const outputArea = document.getElementById('output');
+        const meetingBtn = document.getElementById('meetingBtn');
+        const micBtn = document.getElementById('micBtn');
+        const saveDocBtn = document.getElementById('saveDocBtn');
+        const connectionStatus = document.getElementById('connectionStatus');
+        
+        let ws;
+        let mediaRecorder;
+        let audioStream;
+        let meetingStarted = false;
+        let micOn = false;
+
+        function updateConnectionStatus(status, color) {
+            const dot = connectionStatus.querySelector('span:first-child');
+            const text = connectionStatus.querySelector('span:last-child');
+            dot.className = `w-3 h-3 rounded-full bg-${color}-500`;
+            text.textContent = status;
+            text.className = `text-${color}-600`;
+        }
+
+        function connectWebSocket() {
+            ws = new WebSocket('ws://127.0.0.1:8765');
+            
+            ws.onmessage = function(event) {
+                let text = event.data;
+                // Parse message: "5439 8219  Text here" -> chỉ lấy text
+                const match = text.match(/^\d+\s+\d+\s+(.*)$/);
+                if (match) {
+                    text = match[1];
+                }
+                text = text.replace(/\n/g, '').replace(/\r/g, '');
+                outputArea.value += text;
+                setTimeout(() => {
+                    outputArea.scrollTop = outputArea.scrollHeight;
+                }, 10);
+            };
+            
+            ws.onopen = function() {
+                updateConnectionStatus('Đã kết nối', 'green');
+                outputArea.value += '[Đã kết nối server Speech-to-Text]\n';
+                ws.send("NEW_MEETING");
+                setTimeout(() => {
+                    outputArea.scrollTop = outputArea.scrollHeight;
+                }, 10);
+            };
+            
+            ws.onclose = function() {
+                updateConnectionStatus('Đã ngắt kết nối', 'gray');
+                outputArea.value += '[Đã ngắt kết nối server]\n';
+                setTimeout(() => {
+                    outputArea.scrollTop = outputArea.scrollHeight;
+                }, 10);
+            };
+            
+            ws.onerror = function() {
+                updateConnectionStatus('Lỗi kết nối', 'red');
+                outputArea.value += '[Lỗi kết nối server - Vui lòng kiểm tra server Speech-to-Text]\n';
+            };
+        }
+
+        async function requestMicPermission() {
+            try {
+                const selectedDeviceId = document.getElementById('micSelect').value;
+                const constraints = selectedDeviceId 
+                    ? { audio: { deviceId: { exact: selectedDeviceId } } }
+                    : { audio: true };
+                audioStream = await navigator.mediaDevices.getUserMedia(constraints);
+                return true;
+            } catch (err) {
+                outputArea.value += 'Lỗi truy cập micro: ' + err + '\n';
+                return false;
+            }
+        }
+
+        meetingBtn.onclick = async function() {
+            if (!meetingStarted) {
+                const hasPermission = await requestMicPermission();
+                if (!hasPermission) {
+                    outputArea.value += '[Không thể bắt đầu cuộc họp - cần quyền truy cập micro]\n';
+                    return;
+                }
+                
+                connectWebSocket();
+                meetingStarted = true;
+                meetingBtn.innerHTML = '<i class="bi bi-stop-circle"></i><span>Kết thúc cuộc họp</span>';
+                meetingBtn.classList.remove('bg-green-600', 'hover:bg-green-700');
+                meetingBtn.classList.add('bg-red-600', 'hover:bg-red-700');
+                outputArea.value = '';
+                
+                const info = JSON.parse(localStorage.getItem('meetingInfo') || '{}');
+                outputArea.value += `========================================\n`;
+                outputArea.value += `CUỘC HỌP: ${info.meetingName || 'Không có tên'}\n`;
+                outputArea.value += `Thời gian: ${info.startTime || new Date().toLocaleString('vi-VN')}\n`;
+                outputArea.value += `Phòng ban: ${info.department || '-'}\n`;
+                outputArea.value += `Phòng họp: ${info.room || '-'}\n`;
+                outputArea.value += `Chủ tọa: ${info.hostName || '-'}\n`;
+                outputArea.value += `Thư ký: ${info.secretaryName || '-'}\n`;
+                outputArea.value += `========================================\n\n`;
+                outputArea.value += '[Cuộc họp đã bắt đầu]\n\n';
+                
+                saveDocBtn.disabled = false;
+                micBtn.disabled = false;
+                
+                // Update meeting status to ONGOING via API
+                if (info.meetingId) {
+                    try {
+                        await fetch(`/api/meetings/${info.meetingId}/status?status=ONGOING`, { method: 'PATCH' });
+                    } catch (e) {
+                        console.error('Error updating meeting status:', e);
+                    }
+                }
+            } else {
+                if (micOn) {
+                    stopRecording();
+                }
+                if (audioStream) {
+                    audioStream.getTracks().forEach(track => track.stop());
+                    audioStream = null;
+                }
+                if (ws && ws.readyState === WebSocket.OPEN) {
+                    ws.send("END_MEETING");
+                    await new Promise(resolve => setTimeout(resolve, 300));
+                    ws.close();
+                }
+                
+                meetingStarted = false;
+                micOn = false;
+                meetingBtn.innerHTML = '<i class="bi bi-play-circle"></i><span>Bắt đầu cuộc họp</span>';
+                meetingBtn.classList.remove('bg-red-600', 'hover:bg-red-700');
+                meetingBtn.classList.add('bg-green-600', 'hover:bg-green-700');
+                micBtn.innerHTML = '<i class="bi bi-mic"></i><span>Bật mic</span>';
+                micBtn.classList.remove('bg-red-600', 'hover:bg-red-700');
+                micBtn.classList.add('bg-blue-600', 'hover:bg-blue-700');
+                micBtn.disabled = true;
+                
+                outputArea.value += '\n[Cuộc họp đã kết thúc - ' + new Date().toLocaleString('vi-VN') + ']\n';
+                
+                // Update meeting status to FINISHED via API
+                const info = JSON.parse(localStorage.getItem('meetingInfo') || '{}');
+                if (info.meetingId) {
+                    try {
+                        await fetch(`/api/meetings/${info.meetingId}/status?status=FINISHED`, { method: 'PATCH' });
+                    } catch (e) {
+                        console.error('Error updating meeting status:', e);
+                    }
+                }
+            }
+        };
+
+        function stopRecording() {
+            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                mediaRecorder.stop();
+            }
+            micOn = false;
+            micBtn.innerHTML = '<i class="bi bi-mic"></i><span>Bật mic</span>';
+            micBtn.classList.remove('bg-red-600', 'hover:bg-red-700');
+            micBtn.classList.add('bg-blue-600', 'hover:bg-blue-700');
+            outputArea.value += '[Mic đã tắt]\n';
+            setTimeout(() => {
+                outputArea.scrollTop = outputArea.scrollHeight;
+            }, 10);
+        }
+
+        micBtn.onclick = async function() {
+            if (!meetingStarted) return;
+            
+            if (!micOn) {
+                if (!audioStream) {
+                    outputArea.value += '[Lỗi: Không có audio stream]\n';
+                    return;
+                }
+                
+                if (ws && ws.readyState === WebSocket.OPEN) {
+                    ws.send("MIC_ON");
+                }
+                
+                mediaRecorder = new MediaRecorder(audioStream, { mimeType: 'audio/webm' });
+                mediaRecorder.ondataavailable = function(e) {
+                    if (ws && ws.readyState === WebSocket.OPEN) {
+                        ws.send(e.data);
+                    }
+                };
+                mediaRecorder.start(250);
+                micOn = true;
+                micBtn.innerHTML = '<i class="bi bi-mic-mute"></i><span>Tắt mic</span>';
+                micBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+                micBtn.classList.add('bg-red-600', 'hover:bg-red-700');
+                outputArea.value += '[Mic đã bật - Đang ghi âm...]\n';
+                setTimeout(() => {
+                    outputArea.scrollTop = outputArea.scrollHeight;
+                }, 10);
+            } else {
+                stopRecording();
+            }
+        };
+
+        // Xử lý lưu tài liệu
+        saveDocBtn.onclick = async function() {
+            const content = outputArea.value;
+            if (!content || content.trim() === '') {
+                alert('Không có nội dung để lưu!');
+                return;
+            }
+
+            const meetingInfo = JSON.parse(localStorage.getItem('meetingInfo') || '{}');
+            if (!meetingInfo.meetingCode) {
+                alert('Thiếu thông tin cuộc họp!');
+                return;
+            }
+
+            saveDocBtn.disabled = true;
+            saveDocBtn.innerHTML = '<i class="bi bi-hourglass-split"></i><span>Đang lưu...</span>';
+
+            try {
+                const response = await fetch('http://127.0.0.1:8766/save-document', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        meetingInfo: meetingInfo,
+                        content: content
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    let message = 'Đã lưu tài liệu thành công!\n';
+                    if (result.word) message += `\nFile WORD: ${result.word}`;
+                    if (result.pdf) message += `\nFile PDF: ${result.pdf}`;
+                    message += `\n\nThư mục: ${result.folder}`;
+                    alert(message);
+                } else {
+                    alert('Lỗi khi lưu tài liệu: ' + (result.errors || []).join(', '));
+                }
+            } catch (error) {
+                alert('Lỗi kết nối server lưu tài liệu: ' + error.message + '\n\nHãy đảm bảo server save_meeting_document.py đang chạy.');
+            } finally {
+                saveDocBtn.disabled = false;
+                saveDocBtn.innerHTML = '<i class="bi bi-file-earmark-word"></i><span>Lưu tài liệu</span>';
+            }
+        };
+    </script>
+</body>
+</html>

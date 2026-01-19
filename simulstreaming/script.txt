@@ -1,0 +1,65 @@
+python simulstreaming_whisper_server.py ... | findstr /R /C:"^Output:"
+
+python simulstreaming_whisper_server.py --model_path small --lan auto --task transcribe --port 43001
+
+python send_mic_to_server.py
+
+python simulstreaming_whisper_server.py --model_path small --lan vi --task transcribe --port 43001 | findstr /R /C:"^Output:"
+
+python simulstreaming_whisper_server.py --model_path small --lan vi --task transcribe --port 43001
+
+python simulstreaming_whisper_server.py --model_path small --lan vi --task transcribe --port 43001 | findstr "INFO    Output:"
+
+python simulstreaming_whisper_server.py --model_path small --lan vi --task transcribe --port 43001 | findstr /R /C:"^INFO    Output:"
+
+python simulstreaming_whisper_server.py --model_path small --lan vi --task transcribe --port 43001 | findstr "Output:"
+
+chcp 65001
+set PYTHONIOENCODING=utf-8
+
+python simulstreaming_whisper_server.py --model_path small --lan vi --task transcribe --port 43001 2>&1 | findstr "Output:"
+
+pip install fastapi uvicorn
+
+python simulstreaming_whisper_server.py --lan vi --task transcribe --port 43001
+
+python simulstreaming_whisper_server.py --model_path small --lan vi --task transcribe --port 43001
+
+
+
+cd C:\Users\quang\OneDrive\Desktop\NCKH\SimulStreaming
+
+python simulstreaming_whisper_server.py --model_path small --lan vi --task transcribe --port 43001
+
+python send_mic_to_server.py
+
+python websocket_server.py
+
+# Nghiêm ngặt hơn (lọc nhiều hơn)
+python simulstreaming_whisper_server.py --model_path small --lan vi --task transcribe --port 43001 --nonspeech_prob 0.4 --max_repeat_tokens 2 --compression_ratio_threshold 2.0
+
+# Nhẹ hơn (cho phép nhiều hơn) 
+python simulstreaming_whisper_server.py --model_path small --lan vi --task transcribe --port 43001 --nonspeech_prob 0.8 --max_repeat_tokens 4
+
+#Lệnh cơ bản
+python simulstreaming_whisper_server.py --model_path small --lan vi --task transcribe --port 43001
+
+python simulstreaming_whisper_server.py --model_path base --lan vi --task transcribe --port 43001 --nonspeech_prob 0.7 --max_repeat_tokens 1
+
+#Xem tất cả option
+python simulstreaming_whisper_server.py -h
+
+
+###############################################################
+
+# Tương tự như lệnh cũ
+python faster_whisper_server.py --model_size small --lan vi --task transcribe --port 43001
+
+# Với anti-hallucination (tên cũ vẫn dùng được)
+python faster_whisper_server.py --model_size small --lan vi --port 43001 --nonspeech_prob 0.7 --max_repeat_tokens 2
+
+# Hoặc dùng tên mới
+python faster_whisper_server.py --model_size small --lan vi --port 43001 --no_speech_threshold 0.7 --repetition_penalty 1.5
+
+# Với float16 và large-v3
+python faster_whisper_server.py --model_size large-v3 --compute_type float16 --lan vi --port 43001

@@ -1,0 +1,455 @@
+:root {
+    --sidebar-width: 260px;
+    --header-height: 60px;
+    --primary-color: #4361ee;
+    --primary-dark: #3651d4;
+    --success-color: #10b981;
+    --warning-color: #f59e0b;
+    --danger-color: #ef4444;
+    --secondary-color: #64748b;
+    --bg-color: #f1f5f9;
+    --card-bg: #ffffff;
+    --text-color: #1e293b;
+    --text-muted: #64748b;
+    --border-color: #e2e8f0;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    min-height: 100vh;
+}
+
+/* Sidebar */
+.sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: var(--sidebar-width);
+    height: 100vh;
+    background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+    color: white;
+    z-index: 1000;
+    transition: transform 0.3s ease;
+}
+
+.sidebar.collapsed {
+    transform: translateX(-100%);
+}
+
+.sidebar-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 20px;
+    font-size: 1.25rem;
+    font-weight: 600;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-header i {
+    font-size: 1.5rem;
+    color: var(--primary-color);
+}
+
+.sidebar-nav {
+    padding: 20px 0;
+}
+
+.sidebar-nav .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 20px;
+    color: rgba(255, 255, 255, 0.7);
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border-left: 3px solid transparent;
+}
+
+.sidebar-nav .nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.sidebar-nav .nav-link.active {
+    background-color: rgba(67, 97, 238, 0.2);
+    color: white;
+    border-left-color: var(--primary-color);
+}
+
+.sidebar-nav .nav-link i {
+    font-size: 1.2rem;
+}
+
+/* Main Content */
+.main-content {
+    margin-left: var(--sidebar-width);
+    min-height: 100vh;
+    transition: margin-left 0.3s ease;
+}
+
+.main-content.expanded {
+    margin-left: 0;
+}
+
+/* Header */
+.header {
+    position: sticky;
+    top: 0;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 0 24px;
+    height: var(--header-height);
+    background-color: var(--card-bg);
+    border-bottom: 1px solid var(--border-color);
+    z-index: 100;
+}
+
+.sidebar-toggle {
+    display: none;
+    font-size: 1.5rem;
+    color: var(--text-color);
+}
+
+.header-right {
+    margin-left: auto;
+}
+
+/* Page Content */
+.page-content {
+    padding: 24px;
+}
+
+/* Statistics Cards */
+.stat-card {
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.15);
+}
+
+.stat-card-body {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 24px;
+}
+
+.stat-card-primary {
+    background: linear-gradient(135deg, #4361ee 0%, #3a0ca3 100%);
+    color: white;
+}
+
+.stat-card-success {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+}
+
+.stat-card-warning {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    color: white;
+}
+
+.stat-card-secondary {
+    background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+    color: white;
+}
+
+.stat-icon {
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+}
+
+.stat-icon i {
+    font-size: 1.75rem;
+}
+
+.stat-info h3 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.stat-info p {
+    margin: 0;
+    opacity: 0.9;
+    font-size: 0.9rem;
+}
+
+/* Cards */
+.card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+    background-color: transparent;
+    border-bottom: 1px solid var(--border-color);
+    padding: 16px 20px;
+}
+
+.card-body {
+    padding: 20px;
+}
+
+/* Tables */
+.table {
+    margin-bottom: 0;
+}
+
+.table th {
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+    border-bottom-width: 2px;
+}
+
+.table td {
+    vertical-align: middle;
+    padding: 12px 8px;
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(67, 97, 238, 0.05);
+}
+
+/* Status Badges */
+.badge-status {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.badge-scheduled {
+    background-color: rgba(245, 158, 11, 0.15);
+    color: #d97706;
+}
+
+.badge-ongoing {
+    background-color: rgba(16, 185, 129, 0.15);
+    color: #059669;
+}
+
+.badge-finished {
+    background-color: rgba(100, 116, 139, 0.15);
+    color: #475569;
+}
+
+/* Buttons */
+.btn-action {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    margin: 0 2px;
+}
+
+.btn-join {
+    color: #10b981;
+    background-color: rgba(16, 185, 129, 0.1);
+    border: none;
+}
+
+.btn-join:hover {
+    background-color: #10b981;
+    color: white;
+}
+
+.btn-edit {
+    color: var(--primary-color);
+    background-color: rgba(67, 97, 238, 0.1);
+    border: none;
+}
+
+.btn-edit:hover {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.btn-delete {
+    color: var(--danger-color);
+    background-color: rgba(239, 68, 68, 0.1);
+    border: none;
+}
+
+.btn-delete:hover {
+    background-color: var(--danger-color);
+    color: white;
+}
+
+.btn-status {
+    color: var(--success-color);
+    background-color: rgba(16, 185, 129, 0.1);
+    border: none;
+}
+
+.btn-status:hover {
+    background-color: var(--success-color);
+    color: white;
+}
+
+/* Modal */
+.modal-content {
+    border: none;
+    border-radius: 16px;
+}
+
+.modal-header {
+    border-bottom: 1px solid var(--border-color);
+    padding: 20px 24px;
+}
+
+.modal-body {
+    padding: 24px;
+}
+
+.modal-footer {
+    border-top: 1px solid var(--border-color);
+    padding: 16px 24px;
+}
+
+/* Form Controls */
+.form-control, .form-select {
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    padding: 10px 14px;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.15);
+}
+
+.form-label {
+    font-weight: 500;
+    margin-bottom: 6px;
+    color: var(--text-color);
+}
+
+/* Toast */
+.toast {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+/* Loading Spinner */
+.spinner-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-muted);
+}
+
+.empty-state i {
+    font-size: 4rem;
+    margin-bottom: 16px;
+    opacity: 0.5;
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+    .sidebar {
+        transform: translateX(-100%);
+    }
+
+    .sidebar.show {
+        transform: translateX(0);
+    }
+
+    .main-content {
+        margin-left: 0;
+    }
+
+    .sidebar-toggle {
+        display: block;
+    }
+}
+
+@media (max-width: 768px) {
+    .stat-card-body {
+        padding: 16px;
+    }
+
+    .stat-info h3 {
+        font-size: 1.5rem;
+    }
+
+    .page-content {
+        padding: 16px;
+    }
+}
+
+/* Animation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.page-content {
+    animation: fadeIn 0.3s ease;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #a1a1a1;
+}

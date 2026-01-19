@@ -1,0 +1,9 @@
+# Ignore model weight files
+large-v3.pt
+small.pt
+tiny.pt
+medium.pt
+base.pt
+git c
+./meeting
+    

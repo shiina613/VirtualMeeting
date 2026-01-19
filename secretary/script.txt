@@ -1,0 +1,134 @@
+# HƯỚNG DẪN CHẠY ĐẦY ĐỦ HỆ THỐNG VIRTUAL MEETING SECRETARY
+# ========================================================
+
+## TỔNG QUAN HỆ THỐNG
+# Hệ thống bao gồm 3 thành phần chính:
+# 1. Spring Boot Backend (port 8080) - Quản lý cuộc họp
+# 2. SimulStreaming Whisper Server (port 43001) - Xử lý Speech-to-Text
+# 3. WebSocket Server (port 8765 + 8766) - Kết nối real-time và lưu tài liệu
+
+## YÊU CẦU TIÊN QUYẾT
+# - Java 17+ (để chạy Spring Boot)
+# - Python 3.8+ (để chạy Speech-to-Text)
+# - MySQL Server (cho database)
+# - Git (để clone nếu cần)
+
+# ========================================================
+# BƯỚC 1: CÀI ĐẶT DEPENDENCIES CHO SPEECH-TO-TEXT
+# ========================================================
+
+# 1.1. Cài đặt Python dependencies cho SimulStreaming
+cd ../simulstreaming
+pip install -r requirements.txt
+
+# 1.2. Kiểm tra PyTorch GPU (tùy chọn)
+python -c "import torch; print('CUDA available:', torch.cuda.is_available())"
+
+# ========================================================
+# BƯỚC 2: CHẠY SPRING BOOT BACKEND
+# ========================================================
+
+# 2.1. Đảm bảo MySQL đang chạy và database đã được tạo
+# - Tạo database: CREATE DATABASE virtual_meeting;
+# - Hoặc sử dụng database khác theo cấu hình trong application.properties
+
+# 2.2. Chạy Spring Boot server
+cd ../secretary
+./mvnw spring-boot:run
+
+# Server sẽ chạy trên: http://localhost:8080
+# Swagger API docs: http://localhost:8080/swagger-ui.html
+
+# ========================================================
+# BƯỚC 3: CHẠY SPEECH-TO-TEXT SERVERS
+# ========================================================
+
+# 3.1. Khởi động SimulStreaming Whisper Server (port 43001)
+cd ../simulstreaming
+python simulstreaming_whisper_server.py
+
+# 3.2. Khởi động WebSocket Server (ports 8765 + 8766)
+# (Chạy lệnh này trong terminal riêng)
+python websocket_server.py
+
+# ========================================================
+# BƯỚC 4: KIỂM TRA HOẠT ĐỘNG
+# ========================================================
+
+# 4.1. Kiểm tra Spring Boot Backend
+# - Mở browser: http://localhost:8080
+# - API docs: http://localhost:8080/swagger-ui.html
+# - Test API: curl http://localhost:8080/api/meetings
+
+# 4.2. Kiểm tra Speech-to-Text servers
+# - WebSocket STT: ws://localhost:8765
+# - Document API: http://localhost:8766/save-document
+
+# 4.3. Test Speech-to-Text interface
+# - Mở file: ../simulstreaming/ccpage.html
+# - Hoặc: ../simulstreaming/meeting-room.html (tích hợp với backend)
+
+# ========================================================
+# THỨ TỰ KHỞI ĐỘNG ĐÚNG
+# ========================================================
+# 1. MySQL Server (external)
+# 2. Spring Boot Backend (port 8080)
+# 3. SimulStreaming Server (port 43001)
+# 4. WebSocket Server (ports 8765 + 8766)
+
+# ========================================================
+# DỪNG SERVERS
+# ========================================================
+# - Spring Boot: Ctrl+C trong terminal
+# - Speech-to-Text servers: Ctrl+C trong các terminal tương ứng
+
+# ========================================================
+# LỖI THƯỜNG GẶP VÀ KHẮC PHỤC
+# ========================================================
+
+# Lỗi 1: Port đã được sử dụng
+# - Kiểm tra: netstat -ano | findstr "8080"
+# - Giải pháp: Dừng process đang dùng port hoặc đổi port
+
+# Lỗi 2: MySQL connection failed
+# - Kiểm tra MySQL đang chạy
+# - Kiểm tra cấu hình trong application.properties
+# - Tạo database: CREATE DATABASE virtual_meeting;
+
+# Lỗi 3: SimulStreaming connection failed
+# - Đảm bảo simulstreaming_whisper_server.py chạy trước
+# - Kiểm tra port 43001 không bị block
+
+# Lỗi 4: PyTorch CUDA not available
+# - Cài đặt PyTorch với CUDA support
+# - pip install torch torchvision --index-url https://download.pytorch.org/whl/cu121
+# - Hoặc chạy CPU mode (chậm hơn)
+
+# ========================================================
+# CẤU HÌNH TUỲ CHỌN
+# ========================================================
+
+# Thay đổi ports (nếu cần):
+# - Spring Boot: application.properties -> server.port=8081
+# - WebSocket STT: websocket_server.py -> line ~25, đổi port
+# - Document API: websocket_server.py -> line ~329, đổi port
+
+# Chạy với GPU acceleration:
+# - Đảm bảo PyTorch CUDA đã cài
+# - Kiểm tra: python -c "import torch; print(torch.cuda.is_available())"
+
+# ========================================================
+# LOG FILES
+# ========================================================
+# - Spring Boot logs: Console output
+# - Speech-to-Text logs: Console output của các Python scripts
+# - Database logs: MySQL log files
+
+# ========================================================
+# SUPPORT
+# ========================================================
+# Nếu gặp vấn đề:
+# 1. Kiểm tra console logs để tìm lỗi
+# 2. Đảm bảo tất cả dependencies đã cài
+# 3. Kiểm tra firewall không block ports
+# 4. Restart servers theo thứ tự đúng
