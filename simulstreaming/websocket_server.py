@@ -16,8 +16,9 @@ SIMUL_PORT = 43001
 # Bind address for WebSocket and HTTP servers
 # Use '0.0.0.0' to allow access from other machines
 WS_BIND_HOST = '0.0.0.0'
-WS_PORT = 8765
-HTTP_PORT = 8766
+# Sử dụng port lớn để tránh bị ISP chặn
+WS_PORT = 50765
+HTTP_PORT = 50766
 MAX_RETRY = 5
 RETRY_DELAY = 2  # seconds
 
