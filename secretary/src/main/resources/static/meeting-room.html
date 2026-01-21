@@ -207,33 +207,13 @@
         //     type();
         // }
         
-        // ===== Shiina613: CẤU HÌNH NGROK - BẮT ĐẦU =====
-        // Khi dùng ngrok, thay các link dưới đây bằng link ngrok bạn nhận được
-        // Nếu không dùng ngrok (truy cập trong LAN), để giá trị rỗng ''
-        const WS_NGROK_URL = '';  // Ví dụ: 'wss://bbbb.ngrok-free.app' (ngrok cho port 50765)
-        const API_NGROK_URL = ''; // Ví dụ: 'https://cccc.ngrok-free.app' (ngrok cho port 50766)
-        // ===== Shiina613: CẤU HÌNH NGROK - KẾT THÚC =====
-        
-        // Lấy hostname hiện tại để hỗ trợ truy cập từ máy khác
+        // Cấu hình kết nối WebSocket và API
         const WS_HOST = window.location.hostname || '127.0.0.1';
-        // Sử dụng port lớn để tránh bị ISP chặn
-        const WS_PORT = 50765;
-        const HTTP_PORT = 50766;
-        
-        // ===== Shiina613: TỰ ĐỘNG CHỌN URL - BẮT ĐẦU =====
-        // Tự động chọn URL dựa trên cách truy cập (ngrok hay LAN)
-        const isNgrok = window.location.hostname.includes('ngrok');
-        const WS_URL = (isNgrok && WS_NGROK_URL) ? WS_NGROK_URL : `ws://${WS_HOST}:${WS_PORT}`;
-        const API_URL = (isNgrok && API_NGROK_URL) ? API_NGROK_URL : `http://${WS_HOST}:${HTTP_PORT}`;
-        // ===== Shiina613: TỰ ĐỘNG CHỌN URL - KẾT THÚC =====
+        const WS_PORT = 8765;
+        const HTTP_PORT = 8766;
         
         function connectWebSocket() {
-            // ===== Shiina613: WEBSOCKET CONNECTION - BẮT ĐẦU =====
-            // Code cũ (comment lại):
-            // ws = new WebSocket(`ws://${WS_HOST}:${WS_PORT}`);
-            // Code mới (dùng WS_URL để hỗ trợ ngrok):
-            ws = new WebSocket(WS_URL);
-            // ===== Shiina613: WEBSOCKET CONNECTION - KẾT THÚC =====
+            ws = new WebSocket(`ws://${WS_HOST}:${WS_PORT}`);
             
             ws.onmessage = function(event) {
                 let text = event.data;
@@ -428,12 +408,7 @@
             saveDocBtn.innerHTML = '<i class="bi bi-hourglass-split"></i><span>Đang lưu...</span>';
 
             try {
-                // ===== Shiina613: API SAVE DOCUMENT - BẮT ĐẦU =====
-                // Code cũ (comment lại):
-                // const response = await fetch(`http://${WS_HOST}:${HTTP_PORT}/save-document`, {
-                // Code mới (dùng API_URL để hỗ trợ ngrok):
-                const response = await fetch(`${API_URL}/save-document`, {
-                // ===== Shiina613: API SAVE DOCUMENT - KẾT THÚC =====
+                const response = await fetch(`http://${WS_HOST}:${HTTP_PORT}/save-document`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
