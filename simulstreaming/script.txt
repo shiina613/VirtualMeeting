@@ -218,5 +218,87 @@ python faster_whisper_server.py --model_size small --compute_type float16 --devi
 # Log ít hơn (chỉ warning)
 python faster_whisper_server.py --model_size small --compute_type float16 --device cuda --language vi --task transcribe --port 43001 --log_level WARNING --vad_filter True
 
+###############################################################
+# GỠI Ý CHỐNG HALLUCINATION CHO FASTER WHISPER (ĐẶC BIỆT LARGE-V2)
+###############################################################
+
+# Large-v2 với float16 (hallucination nặng) - Tăng anti-hallucination
+python faster_whisper_server.py --model_size large-v2 --compute_type float16 --device cuda --language vi --task transcribe --port 43001 --min_chunk_size 0.5 --no_speech_threshold 0.2 --repetition_penalty 2.0 --compression_ratio_threshold 1.5 --logprob_threshold -2.5 --max_initial_timestamp_index 200 --initial_prompt "Đây là cuộc họp tiếng Việt. Chỉ transcription chính xác." --vad_filter True --vad_parameters '{"threshold": 0.3, "min_speech_duration_ms": 500}'
+
+# Large-v2 với int8_float16 (giảm hallucination hơn float16 thuần)
+python faster_whisper_server.py --model_size large-v2 --compute_type int8_float16 --device cuda --language vi --task transcribe --port 43001 --min_chunk_size 0.6 --no_speech_threshold 0.3 --repetition_penalty 1.8 --compression_ratio_threshold 1.8 --logprob_threshold -2.0 --max_initial_timestamp_index 150 --initial_prompt "Transcription chính xác, không thêm thắt." --vad_filter True
+
+# Khuyến nghị: Dùng large-v3 thay large-v2 (ít hallucination hơn)
+python faster_whisper_server.py --model_size large-v3 --compute_type int8_float16 --device cuda --language vi --task transcribe --port 43001 --min_chunk_size 0.5 --no_speech_threshold 0.3 --repetition_penalty 1.6 --compression_ratio_threshold 1.8 --logprob_threshold -2.0 --max_initial_timestamp_index 100 --initial_prompt "Đây là cuộc họp tiếng Việt." --vad_filter True
+
+###############################################################
+# GỠI Ý IN CHỈ TEXT MỚI (INCREMENTAL) CHO FASTER WHISPER (KHÔNG IN TOÀN BỘ ĐOẠN)
+###############################################################
+
+# Vấn đề: Faster Whisper in toàn bộ transcription tích lũy mỗi lần update, không phải chỉ text mới.
+# Giải pháp: Dùng script Python để track và in chỉ phần mới.
+
+# Script Python để in incremental (lưu vào file incremental_output.py)
+# Nội dung script:
+# import sys
+# last_output = ""
+# for line in sys.stdin:
+#     line = line.strip()
+#     if line and line != last_output:
+#         new_part = line[len(last_output):].strip()
+#         if new_part:
+#             print(new_part)
+#         last_output = line
+
+# Lệnh chạy với incremental output:
+python faster_whisper_server.py --model_size large-v2 --compute_type float16 --device cuda --language vi --task transcribe --port 43001 --min_chunk_size 1.0 --vad_filter True | python incremental_output.py
+
+# Hoặc dùng diff với tail -f (nếu trên Linux/Mac):
+# python faster_whisper_server.py ... | while read line; do echo "$line" | diff -u <(echo "$prev") - | tail -n +3 | grep '^+'; prev="$line"; done
+
+# Cho Windows (dùng PowerShell để diff):
+# python faster_whisper_server.py --model_size large-v2 --compute_type float16 --device cuda --language vi --task transcribe --port 43001 --min_chunk_size 1.0 --vad_filter True | powershell -Command "$prev=''; foreach ($line in $input) { if ($line -and $line -ne $prev) { $new = $line.Substring($prev.Length); if ($new) { Write-Host $new.Trim() }; $prev = $line } }"
+
+# Nếu muốn modify faster_whisper_server.py để in incremental (thêm code track last_text và in diff).
+
+###############################################################
+# LỆNH FASTER WHISPER ƯU TIÊN ĐỘ CHÍNH XÁC CHO LARGE-V2 (DÙNG NHIỀU RAM HƠN)
+###############################################################
+
+# Large-v2 với float16 (ưu tiên độ chính xác, dùng ~6GB VRAM thay vì 4GB với int8)
+python faster_whisper_server.py --model_size large-v2 --compute_type float16 --device cuda --language vi --task transcribe --port 43001 --min_chunk_size 0.3 --no_speech_threshold 0.2 --repetition_penalty 2.0 --compression_ratio_threshold 1.5 --logprob_threshold -2.5 --max_initial_timestamp_index 200 --initial_prompt "Đây là cuộc họp tiếng Việt. Transcription chính xác, không thêm thắt." --vad_filter True --vad_parameters '{"threshold": 0.3, "min_speech_duration_ms": 500}' | python incremental_output.py
+
+# Nếu RAM quá nhiều, dùng int8_float16 (cân bằng chính xác và memory)
+python faster_whisper_server.py --model_size large-v2 --compute_type int8_float16 --device cuda --language vi --task transcribe --port 43001 --min_chunk_size 0.4 --no_speech_threshold 0.25 --repetition_penalty 1.8 --compression_ratio_threshold 1.7 --logprob_threshold -2.2 --max_initial_timestamp_index 150 --initial_prompt "Transcription chính xác." --vad_filter True | python incremental_output.py
+
+###############################################################
+# CÁCH CHẠY SIMULSTREAMING_WHISPER_SERVER.PY MÀ KHÔNG TRÀN SHARED RAM
+###############################################################
+
+# 1. Dùng large.pt (v1, ~3GB) thay large-v3 (~6GB), bỏ --half vì không support
+python simulstreaming_whisper_server.py --model_path large.pt --lan vi --task transcribe --port 43001 --beams 1 --frame_threshold 20 --min-chunk-size 1.5 --nonspeech_prob 0.6 --max_repeat_tokens 3 --compression_ratio_threshold 2.2 --vac --vac-chunk-size 0.04
+
+# 2. Force dùng GPU only (tránh load vào shared RAM) - Thêm env var
+set CUDA_VISIBLE_DEVICES=0 && python simulstreaming_whisper_server.py --model_path large.pt --lan vi --task transcribe --port 43001 --beams 1 --frame_threshold 20 --min-chunk-size 1.5 --nonspeech_prob 0.6 --max_repeat_tokens 3 --compression_ratio_threshold 2.2 --vac --vac-chunk-size 0.04
+
+# 3. Preload model trên GPU trước (chạy script preload riêng)
+# Tạo file preload_model.py:
+# import torch
+# from simul_whisper.simul_whisper import PaddedAlignAttWhisper
+# model = PaddedAlignAttWhisper.from_pretrained('large.pt', device='cuda')
+# print("Model preloaded")
+# Sau đó chạy server.
+
+# 4. Dùng CPU nếu GPU tràn (chậm hơn nhiều)
+python simulstreaming_whisper_server.py --model_path large.pt --lan vi --task transcribe --port 43001 --beams 1 --frame_threshold 20 --min-chunk-size 1.5 --nonspeech_prob 0.6 --max_repeat_tokens 3 --compression_ratio_threshold 2.2 --vac --vac-chunk-size 0.04 --device cpu
+
+# 5. Giảm model xuống medium (ít RAM hơn, vẫn khá chính xác) - Max độ chính xác
+python simulstreaming_whisper_server.py --model_path medium.pt --lan vi --task transcribe --port 43001 --beams 5 --frame_threshold 10 --min-chunk-size 0.5 --nonspeech_prob 0.3 --max_repeat_tokens 2 --compression_ratio_threshold 1.8 --logprob_threshold -2.0 --max_context_tokens 100 --init_prompt "Đây là cuộc họp tiếng Việt." --vac --vac-chunk-size 0.04
+
+# Khuyến nghị cuối: Chuyển sang faster_whisper với int8 để tránh tràn RAM hoàn toàn.
+
 Câu lệnh gợi ý:
 python simulstreaming_whisper_server.py --model_path large.pt --lan vi --task transcribe --port 43001 --beams 1 --frame_threshold 20 --min-chunk-size 1.5 --nonspeech_prob 0.6 --max_repeat_tokens 3 --compression_ratio_threshold 2.2 --vac --vac-chunk-size 0.04
+
+
+python simulstreaming_whisper_server.py --model_path medium.pt --lan vi --task transcribe --port 43001 --beams 5 --frame_threshold 10 --min-chunk-size 0.5 --nonspeech_prob 0.3 --max_repeat_tokens 2 --compression_ratio_threshold 1.8 --logprob_threshold -2.0 --max_context_tokens 100 --init_prompt "Cuộc họp bắt đầu"
