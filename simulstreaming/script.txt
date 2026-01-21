@@ -118,6 +118,17 @@ python simulstreaming_whisper_server.py --model_path small.pt --lan vi --task tr
 
 
 ###############################################################
+# GỠI Ý CHO RTX 3060 Ti 16GB - TIẾT KIỆM MEMORY (DÙNG FASTER WHISPER)
+###############################################################
+
+# Model Large v1 với int8 (tiết kiệm VRAM, ~2-3GB thay vì 6GB)
+python faster_whisper_server.py --model_size large-v1 --compute_type int8_float16 --device cuda --lan vi --port 43001 --min-chunk-size 1.0 --vac
+
+# Model Large v3 với int8 (tốt nhất nhưng vẫn ~4GB VRAM)
+python faster_whisper_server.py --model_size large-v3 --compute_type int8_float16 --device cuda --lan vi --port 43001 --min-chunk-size 1.0 --vac
+
+# Model Medium với float16 (cân bằng, ~2GB VRAM)
+python faster_whisper_server.py --model_size medium --compute_type float16 --device cuda --lan vi --port 43001 --min-chunk-size 1.0 --vac
 
 # Tương tự như lệnh cũ
 python faster_whisper_server.py --model_size small --lan vi --task transcribe --port 43001
@@ -130,6 +141,82 @@ python faster_whisper_server.py --model_size small --lan vi --port 43001 --no_sp
 
 # Với float16 và large-v3
 python faster_whisper_server.py --model_size tiny --compute_type float16 --lan vi --port 43001
+
+###############################################################
+# GỠI Ý LỆNH FASTER WHISPER TƯƠNG TỰ SIMULSTREAMING (TỐI ƯU MEMORY VÀ TỐC ĐỘ)
+###############################################################
+
+# ===========================================
+# GTX 1650 Ti 4GB (Laptop) - Ưu tiên tốc độ với Faster Whisper
+# ===========================================
+
+# Model Tiny: Nhanh nhất, ít tài nguyên (~1GB VRAM)
+python faster_whisper_server.py --model_size tiny --compute_type int8_float16 --device cuda --language vi --task transcribe --port 43001 --min_chunk_size 1.5 --no_speech_threshold 0.7 --repetition_penalty 1.2 --compression_ratio_threshold 2.4 --vad_filter True
+
+# Model Base: Cân bằng tốc độ và chất lượng (~1.5GB VRAM)
+python faster_whisper_server.py --model_size base --compute_type int8_float16 --device cuda --language vi --task transcribe --port 43001 --min_chunk_size 1.2 --no_speech_threshold 0.6 --repetition_penalty 1.3 --compression_ratio_threshold 2.3 --vad_filter True
+
+# Model Small: Giới hạn cho laptop (~2GB VRAM)
+python faster_whisper_server.py --model_size small --compute_type int8_float16 --device cuda --language vi --task transcribe --port 43001 --min_chunk_size 1.0 --no_speech_threshold 0.5 --repetition_penalty 1.4 --compression_ratio_threshold 2.2 --vad_filter True
+
+# ===========================================
+# RTX 5060 Ti 16GB (PC) - Dùng model lớn hơn với Faster Whisper
+# ===========================================
+
+# Model Small: Nhanh, ổn định (~2GB VRAM)
+python faster_whisper_server.py --model_size small --compute_type float16 --device cuda --language vi --task transcribe --port 43001 --min_chunk_size 0.8 --no_speech_threshold 0.5 --repetition_penalty 1.4 --compression_ratio_threshold 2.2 --vad_filter True
+
+# Model Medium: Cân bằng chất lượng và tốc độ (~3GB VRAM)
+python faster_whisper_server.py --model_size medium --compute_type int8_float16 --device cuda --language vi --task transcribe --port 43001 --min_chunk_size 0.8 --no_speech_threshold 0.4 --repetition_penalty 1.5 --compression_ratio_threshold 2.0 --logprob_threshold -1.5 --vad_filter True
+
+# Model Large v1: Độ chính xác cao (~3GB VRAM với int8)
+python faster_whisper_server.py --model_size large-v1 --compute_type int8_float16 --device cuda --language vi --task transcribe --port 43001 --min_chunk_size 0.6 --no_speech_threshold 0.3 --repetition_penalty 1.6 --compression_ratio_threshold 1.8 --logprob_threshold -2.0 --vad_filter True
+
+# Model Large v3: Tốt nhất cho độ chính xác (~4GB VRAM với int8)
+python faster_whisper_server.py --model_size large-v3 --compute_type int8_float16 --device cuda --language vi --task transcribe --port 43001 --min_chunk_size 0.5 --no_speech_threshold 0.3 --repetition_penalty 1.6 --compression_ratio_threshold 1.8 --logprob_threshold -2.0 --max_initial_timestamp_index 100 --initial_prompt "Đây là cuộc họp tiếng Việt." --vad_filter True
+
+# ===========================================
+# RTX 3060 Ti 16GB - Ưu tiên tốc độ với Faster Whisper (large v1, tiết kiệm memory)
+# ===========================================
+
+# Cân bằng (large v1 với int8_float16, ~2-3GB VRAM)
+python faster_whisper_server.py --model_size large-v1 --compute_type int8_float16 --device cuda --language vi --task transcribe --port 43001 --min_chunk_size 1.5 --no_speech_threshold 0.6 --repetition_penalty 1.5 --compression_ratio_threshold 2.2 --vad_filter True
+
+# Ưu tiên tốc độ cực đoan (hi sinh độ chính xác, large v1 với int8)
+python faster_whisper_server.py --model_size large-v1 --compute_type int8 --device cuda --language vi --task transcribe --port 43001 --min_chunk_size 2.0 --no_speech_threshold 0.8 --repetition_penalty 1.2 --compression_ratio_threshold 2.5 --vad_filter True
+
+# ===========================================
+# ƯU TIÊN THEO TIÊU CHÍ VỚI FASTER WHISPER
+# ===========================================
+
+# Ưu tiên tốc độ (cho laptop/PC, model nhỏ, int8)
+python faster_whisper_server.py --model_size tiny --compute_type int8 --device cuda --language vi --task transcribe --port 43001 --min_chunk_size 2.0 --vad_filter True
+
+# Ưu tiên độ chính xác (cho PC mạnh, large v3 với float16)
+python faster_whisper_server.py --model_size large-v3 --compute_type float16 --device cuda --language vi --task transcribe --port 43001 --min_chunk_size 0.3 --no_speech_threshold 0.2 --repetition_penalty 1.8 --compression_ratio_threshold 1.5 --logprob_threshold -2.5 --max_initial_timestamp_index 200 --initial_prompt "Đây là cuộc họp tiếng Việt." --vad_filter True
+
+# Ưu tiên tính ổn định (cân bằng, medium với int8_float16)
+python faster_whisper_server.py --model_size medium --compute_type int8_float16 --device cuda --language vi --task transcribe --port 43001 --min_chunk_size 1.0 --no_speech_threshold 0.5 --repetition_penalty 1.5 --compression_ratio_threshold 2.0 --logprob_threshold -1.0 --vad_filter True
+
+# ===========================================
+# CẤU HÌNH CHO DỊCH THUẬT VỚI FASTER WHISPER
+# ===========================================
+
+# Dịch sang tiếng Anh (từ tiếng Việt, medium với int8)
+python faster_whisper_server.py --model_size medium --compute_type int8_float16 --device cuda --language vi --task translate --port 43001 --min_chunk_size 1.0 --no_speech_threshold 0.5 --repetition_penalty 1.5 --compression_ratio_threshold 2.0 --vad_filter True
+
+# ===========================================
+# CẤU HÌNH VỚI WARMUP VÀ LOGGING VỚI FASTER WHISPER
+# ===========================================
+
+# Với warmup (tải file audio để khởi động nhanh)
+python faster_whisper_server.py --model_size small --compute_type float16 --device cuda --language vi --task transcribe --port 43001 --warmup_file https://github.com/ggerganov/whisper.cpp/raw/master/samples/jfk.wav --vad_filter True
+
+# Log chi tiết để debug
+python faster_whisper_server.py --model_size small --compute_type float16 --device cuda --language vi --task transcribe --port 43001 --log_level DEBUG --vad_filter True
+
+# Log ít hơn (chỉ warning)
+python faster_whisper_server.py --model_size small --compute_type float16 --device cuda --language vi --task transcribe --port 43001 --log_level WARNING --vad_filter True
 
 Câu lệnh gợi ý:
 python simulstreaming_whisper_server.py --model_path large.pt --lan vi --task transcribe --port 43001 --beams 1 --frame_threshold 20 --min-chunk-size 1.5 --nonspeech_prob 0.6 --max_repeat_tokens 3 --compression_ratio_threshold 2.2 --vac --vac-chunk-size 0.04
