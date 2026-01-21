@@ -130,3 +130,6 @@ python faster_whisper_server.py --model_size small --lan vi --port 43001 --no_sp
 
 # Với float16 và large-v3
 python faster_whisper_server.py --model_size tiny --compute_type float16 --lan vi --port 43001
+
+Câu lệnh gợi ý:
+python simulstreaming_whisper_server.py --model_path large.pt --lan vi --task transcribe --port 43001 --beams 1 --frame_threshold 20 --min-chunk-size 1.5 --nonspeech_prob 0.6 --max_repeat_tokens 3 --compression_ratio_threshold 2.2 --vac --vac-chunk-size 0.04
