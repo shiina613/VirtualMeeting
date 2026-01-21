@@ -207,8 +207,13 @@
         //     type();
         // }
         
+        // Lấy hostname hiện tại để hỗ trợ truy cập từ máy khác
+        const WS_HOST = window.location.hostname || '127.0.0.1';
+        const WS_PORT = 8765;
+        const HTTP_PORT = 8766;
+        
         function connectWebSocket() {
-            ws = new WebSocket('ws://127.0.0.1:8765');
+            ws = new WebSocket(`ws://${WS_HOST}:${WS_PORT}`);
             
             ws.onmessage = function(event) {
                 let text = event.data;
@@ -403,7 +408,7 @@
             saveDocBtn.innerHTML = '<i class="bi bi-hourglass-split"></i><span>Đang lưu...</span>';
 
             try {
-                const response = await fetch('http://127.0.0.1:8766/save-document', {
+                const response = await fetch(`http://${WS_HOST}:${HTTP_PORT}/save-document`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

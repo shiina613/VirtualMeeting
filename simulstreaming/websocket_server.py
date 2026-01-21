@@ -13,6 +13,11 @@ from save_meeting_document import save_meeting_documents
 
 SIMUL_HOST = '127.0.0.1'
 SIMUL_PORT = 43001
+# Bind address for WebSocket and HTTP servers
+# Use '0.0.0.0' to allow access from other machines
+WS_BIND_HOST = '0.0.0.0'
+WS_PORT = 8765
+HTTP_PORT = 8766
 MAX_RETRY = 5
 RETRY_DELAY = 2  # seconds
 
@@ -71,8 +76,7 @@ async def connect_to_simulstreaming():
     
     print(f"[ERROR] Cannot connect to SimulStreaming server at {SIMUL_HOST}:{SIMUL_PORT}")
     print(f"[ERROR] Make sure whisper server is running first!")
-    print(f"[ERROR] Run: python faster_whisper_server.py --model_size large-v3 --compute_type float16 --lan vi")
-    print(f"[ERROR] Or:  python simulstreaming_whisper_server.py")
+    print(f"[ERROR] Run: python simulstreaming_whisper_server.py --model_path medium.pt --lan vi --task transcribe --port 43001")
     return False
 
 
@@ -326,17 +330,18 @@ async def main():
     http_app = await create_http_app()
     http_runner = web.AppRunner(http_app)
     await http_runner.setup()
-    http_site = web.TCPSite(http_runner, '127.0.0.1', 8766)
+    http_site = web.TCPSite(http_runner, WS_BIND_HOST, HTTP_PORT)
     await http_site.start()
     
     # 4. Khởi động WebSocket server (port 8765)
     print("=" * 60)
-    print("WebSocket server started on ws://127.0.0.1:8765")
-    print("Document API server started on http://127.0.0.1:8766")
+    print(f"WebSocket server started on ws://{WS_BIND_HOST}:{WS_PORT}")
+    print(f"Document API server started on http://{WS_BIND_HOST}:{HTTP_PORT}")
     print("Open ccpage.html in browser to start")
+    print("Access from other machines using your IP address")
     print("=" * 60)
     
-    async with websockets.serve(handler, "127.0.0.1", 8765, max_size=10*1024*1024):
+    async with websockets.serve(handler, WS_BIND_HOST, WS_PORT, max_size=10*1024*1024):
         await asyncio.Future()  # run forever
 
 
