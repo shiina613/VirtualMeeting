@@ -190,6 +190,23 @@
             text.className = `text-${color}-600`;
         }
 
+        // function typeWriter(text, element, speed = 20){
+        //     let i = 0;
+
+        //     function type(){
+        //         if (i < text.length) {
+        //             element.value += text.charAt(i);
+        //             i++;
+        //             setTimeout(type, speed);
+        //         }else{
+        //             setTimeout(() => {
+        //                 element.scrollTop = element.scrollHeight;
+        //             }, 10);
+        //         }
+        //     }
+        //     type();
+        // }
+        
         function connectWebSocket() {
             ws = new WebSocket('ws://127.0.0.1:8765');
             
@@ -201,6 +218,8 @@
                     text = match[1];
                 }
                 text = text.replace(/\n/g, '').replace(/\r/g, '');
+
+                // typeWriter(text, outputArea, 15);
                 outputArea.value += text;
                 setTimeout(() => {
                     outputArea.scrollTop = outputArea.scrollHeight;

@@ -44,7 +44,7 @@ python simulstreaming_whisper_server.py --model_path small --lan vi --task trans
 #Lệnh cơ bản
 python simulstreaming_whisper_server.py --model_path small --lan vi --task transcribe --port 43001
 
-python simulstreaming_whisper_server.py --model_path base --lan vi --task transcribe --port 43001 --nonspeech_prob 0.7 --max_repeat_tokens 1
+python simulstreaming_whisper_server.py --model_path tiny --lan vi --task transcribe --port 43001 --nonspeech_prob 0.7 --max_repeat_tokens 1
 
 #Xem tất cả option
 python simulstreaming_whisper_server.py -h
@@ -62,4 +62,4 @@ python faster_whisper_server.py --model_size small --lan vi --port 43001 --nonsp
 python faster_whisper_server.py --model_size small --lan vi --port 43001 --no_speech_threshold 0.7 --repetition_penalty 1.5
 
 # Với float16 và large-v3
-python faster_whisper_server.py --model_size large-v3 --compute_type float16 --lan vi --port 43001
+python faster_whisper_server.py --model_size tiny --compute_type float16 --lan vi --port 43001
