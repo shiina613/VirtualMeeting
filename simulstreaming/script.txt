@@ -49,6 +49,73 @@ python simulstreaming_whisper_server.py --model_path tiny --lan vi --task transc
 #Xem tất cả option
 python simulstreaming_whisper_server.py -h
 
+# ===========================================
+# GỠI Ý CÂU LỆNH CHẠY CHO TỪNG CẤU HÌNH HARDWARE
+# ===========================================
+
+# GTX 1650 Ti 4GB (Laptop) - VRAM thấp, ưu tiên tốc độ
+# Model Tiny: Nhanh nhất, ít tài nguyên
+python simulstreaming_whisper_server.py --model_path tiny.pt --lan vi --task transcribe --port 43001 --beams 1 --frame_threshold 30 --min-chunk-size 1.5 --nonspeech_prob 0.7 --max_repeat_tokens 2
+
+# Model Base: Cân bằng tốc độ và chất lượng
+python simulstreaming_whisper_server.py --model_path base.pt --lan vi --task transcribe --port 43001 --beams 1 --frame_threshold 25 --min-chunk-size 1.2 --nonspeech_prob 0.6 --max_repeat_tokens 3
+
+# Model Small: Giới hạn cho laptop, ưu tiên tốc độ
+python simulstreaming_whisper_server.py --model_path small.pt --lan vi --task transcribe --port 43001 --beams 1 --frame_threshold 20 --min-chunk-size 1.0 --nonspeech_prob 0.5 --max_repeat_tokens 3 --compression_ratio_threshold 2.2
+
+# RTX 5060 Ti 16GB (PC) - VRAM cao, có thể dùng model lớn
+# Model Small: Nhanh, ổn định
+python simulstreaming_whisper_server.py --model_path small.pt --lan vi --task transcribe --port 43001 --beams 2 --frame_threshold 20 --min-chunk-size 0.8 --nonspeech_prob 0.5 --max_repeat_tokens 3 --compression_ratio_threshold 2.2
+
+# Model Medium: Cân bằng chất lượng và tốc độ
+python simulstreaming_whisper_server.py --model_path medium.pt --lan vi --task transcribe --port 43001 --beams 3 --frame_threshold 15 --min-chunk-size 0.8 --nonspeech_prob 0.4 --max_repeat_tokens 3 --compression_ratio_threshold 2.0 --logprob_threshold -1.5
+
+# Model Large: Độ chính xác cao
+python simulstreaming_whisper_server.py --model_path large.pt --lan vi --task transcribe --port 43001 --beams 5 --frame_threshold 10 --min-chunk-size 0.6 --nonspeech_prob 0.3 --max_repeat_tokens 2 --compression_ratio_threshold 1.8 --logprob_threshold -2.0
+
+# Model Large-v3: Tốt nhất cho độ chính xác
+python simulstreaming_whisper_server.py --model_path large-v3.pt --lan vi --task transcribe --port 43001 --beams 5 --frame_threshold 8 --min-chunk-size 0.5 --nonspeech_prob 0.3 --max_repeat_tokens 2 --compression_ratio_threshold 1.8 --logprob_threshold -2.0 --max_context_tokens 100
+
+# ===========================================
+# ƯU TIÊN THEO TIÊU CHÍ
+# ===========================================
+
+# ƯU TIÊN TỐC ĐỘ (cho cả laptop và PC)
+# - Model nhỏ, beams ít, frame_threshold cao, min-chunk-size lớn
+python simulstreaming_whisper_server.py --model_path tiny.pt --lan vi --task transcribe --port 43001 --beams 1 --frame_threshold 35 --min-chunk-size 2.0 --vac --vac-chunk-size 0.05
+
+# ƯU TIÊN ĐỘ CHÍNH XÁC (cho PC mạnh)
+# - Model lớn, beams nhiều, frame_threshold thấp, min-chunk-size nhỏ, tăng anti-hallucination
+python simulstreaming_whisper_server.py --model_path large-v3.pt --lan vi --task transcribe --port 43001 --beams 8 --frame_threshold 5 --min-chunk-size 0.3 --nonspeech_prob 0.2 --max_repeat_tokens 1 --compression_ratio_threshold 1.5 --logprob_threshold -2.5 --max_context_tokens 200 --init_prompt "Đây là cuộc họp tiếng Việt."
+
+# ƯU TIÊN TÍNH ỔN ĐỊNH (cân bằng)
+# - Cấu hình trung bình, tăng các ngưỡng chống hallucination
+python simulstreaming_whisper_server.py --model_path medium.pt --lan vi --task transcribe --port 43001 --beams 3 --frame_threshold 15 --min-chunk-size 1.0 --nonspeech_prob 0.5 --max_repeat_tokens 3 --compression_ratio_threshold 2.0 --logprob_threshold -1.0 --vac --vac-chunk-size 0.04
+
+# ===========================================
+# CẤU HÌNH CHO DỊCH THUẬT (TRANSLATE)
+# ===========================================
+
+# Dịch sang tiếng Anh (từ tiếng Việt)
+python simulstreaming_whisper_server.py --model_path medium.pt --lan vi --task translate --port 43001 --beams 3 --frame_threshold 15 --min-chunk-size 1.0 --nonspeech_prob 0.5 --max_repeat_tokens 3 --compression_ratio_threshold 2.0
+
+# ===========================================
+# CẤU HÌNH VỚI WARMUP (khởi động nhanh hơn)
+# ===========================================
+
+# Tải file warmup (ví dụ: jfk.wav từ whisper.cpp samples)
+python simulstreaming_whisper_server.py --model_path small.pt --lan vi --task transcribe --port 43001 --warmup-file https://github.com/ggerganov/whisper.cpp/raw/master/samples/jfk.wav --beams 2 --frame_threshold 20
+
+# ===========================================
+# GỠI Ý CHO LOGGING VÀ DEBUG
+# ===========================================
+
+# Log chi tiết để debug
+python simulstreaming_whisper_server.py --model_path small.pt --lan vi --task transcribe --port 43001 --log-level DEBUG --logdir ./logs
+
+# Log ít hơn (chỉ warning trở lên)
+python simulstreaming_whisper_server.py --model_path small.pt --lan vi --task transcribe --port 43001 --log-level WARNING
+
 
 ###############################################################
 
