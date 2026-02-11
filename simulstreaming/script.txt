@@ -170,4 +170,4 @@ Câu lệnh gợi ý:
 python simulstreaming_whisper_server.py --model_path large.pt --lan vi --task transcribe --port 43001 --beams 1 --frame_threshold 20 --min-chunk-size 1.5 --nonspeech_prob 0.6 --max_repeat_tokens 3 --compression_ratio_threshold 2.2 --vac --vac-chunk-size 0.04
 
 
-python simulstreaming_whisper_server.py --model_path medium.pt --lan vi --task transcribe --port 43001 --beams 5 --frame_threshold 10 --min-chunk-size 0.5 --nonspeech_prob 0.3 --max_repeat_tokens 2 --compression_ratio_threshold 1.8 --logprob_threshold -2.0 --max_context_tokens 100 --init_prompt "Cuộc họp bắt đầu"
+python simulstreaming_whisper_server.py --model_path medium.pt --lan vi --task transcribe --port 43001 --beams 3 --frame_threshold 10 --min-chunk-size 0.5 --nonspeech_prob 0.3 --max_repeat_tokens 2 --compression_ratio_threshold 1.8 --logprob_threshold -2.0 --max_context_tokens 100

@@ -181,6 +181,11 @@
         let audioStream;
         let meetingStarted = false;
         let micOn = false;
+        let silenceTimer = null;
+        let lastAudioTime = Date.now();
+        let audioContext = null;
+        let analyser = null;
+        let silenceThreshold = 3000; // 3 seconds
 
         function updateConnectionStatus(status, color) {
             const dot = connectionStatus.querySelector('span:first-child');
@@ -190,22 +195,75 @@
             text.className = `text-${color}-600`;
         }
 
-        // function typeWriter(text, element, speed = 20){
-        //     let i = 0;
+        function addLineBreak() {
+            if (outputArea.value && !outputArea.value.endsWith('\n')) {
+                outputArea.value += '\n';
+                setTimeout(() => {
+                    outputArea.scrollTop = outputArea.scrollHeight;
+                }, 10);
+            }
+        }
 
-        //     function type(){
-        //         if (i < text.length) {
-        //             element.value += text.charAt(i);
-        //             i++;
-        //             setTimeout(type, speed);
-        //         }else{
-        //             setTimeout(() => {
-        //                 element.scrollTop = element.scrollHeight;
-        //             }, 10);
-        //         }
-        //     }
-        //     type();
-        // }
+        function setupAudioAnalysis() {
+            if (!audioStream || !micOn) return;
+            
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                analyser = audioContext.createAnalyser();
+                const source = audioContext.createMediaStreamSource(audioStream);
+                source.connect(analyser);
+                
+                analyser.fftSize = 256;
+                const bufferLength = analyser.frequencyBinCount;
+                const dataArray = new Uint8Array(bufferLength);
+                
+                function checkAudioLevel() {
+                    if (!micOn || !analyser) return;
+                    
+                    analyser.getByteFrequencyData(dataArray);
+                    const average = dataArray.reduce((a, b) => a + b) / bufferLength;
+                    
+                    // If there's audio activity (above threshold), reset silence timer
+                    if (average > 10) { // Adjust threshold as needed
+                        lastAudioTime = Date.now();
+                        if (silenceTimer) {
+                            clearTimeout(silenceTimer);
+                            silenceTimer = null;
+                        }
+                    } else {
+                        // If no audio and no timer set, start silence timer
+                        if (!silenceTimer) {
+                            silenceTimer = setTimeout(() => {
+                                if (micOn && Date.now() - lastAudioTime >= silenceThreshold) {
+                                    addLineBreak();
+                                }
+                                silenceTimer = null;
+                            }, silenceThreshold);
+                        }
+                    }
+                    
+                    if (micOn) {
+                        requestAnimationFrame(checkAudioLevel);
+                    }
+                }
+                
+                checkAudioLevel();
+            } catch (error) {
+                console.error('Error setting up audio analysis:', error);
+            }
+        }
+
+        function cleanupAudioAnalysis() {
+            if (silenceTimer) {
+                clearTimeout(silenceTimer);
+                silenceTimer = null;
+            }
+            if (audioContext && audioContext.state !== 'closed') {
+                audioContext.close();
+                audioContext = null;
+            }
+            analyser = null;
+        }
         
         // Cấu hình kết nối WebSocket và API
         const WS_HOST = window.location.hostname || '127.0.0.1';
@@ -313,6 +371,7 @@
                     audioStream.getTracks().forEach(track => track.stop());
                     audioStream = null;
                 }
+                cleanupAudioAnalysis(); // Clean up audio analysis when meeting ends
                 if (ws && ws.readyState === WebSocket.OPEN) {
                     ws.send("END_MEETING");
                     await new Promise(resolve => setTimeout(resolve, 300));
@@ -347,6 +406,8 @@
             if (mediaRecorder && mediaRecorder.state !== 'inactive') {
                 mediaRecorder.stop();
             }
+            cleanupAudioAnalysis();
+            addLineBreak(); // Add line break when mic is turned off
             micOn = false;
             micBtn.innerHTML = '<i class="bi bi-mic"></i><span>Bật mic</span>';
             micBtn.classList.remove('bg-red-600', 'hover:bg-red-700');
@@ -378,6 +439,9 @@
                 };
                 mediaRecorder.start(250);
                 micOn = true;
+                lastAudioTime = Date.now(); // Reset audio time when mic turns on
+                setupAudioAnalysis(); // Start audio analysis for silence detection
+                addLineBreak(); // Add line break when mic is turned on
                 micBtn.innerHTML = '<i class="bi bi-mic-mute"></i><span>Tắt mic</span>';
                 micBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700');
                 micBtn.classList.add('bg-red-600', 'hover:bg-red-700');
